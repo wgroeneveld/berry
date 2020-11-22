@@ -272,9 +272,13 @@ export class PnpInstaller implements Installer {
       await xfs.removePromise(pnpPath.cjsLegacy);
     }
 
+    if (this.opts.project.topLevelWorkspace.manifest.type !== `module`)
+      await xfs.removePromise(pnpPath.esmLoader);
+
     if (this.opts.project.configuration.get(`nodeLinker`) !== `pnp`) {
       await xfs.removePromise(pnpPath.cjs);
       await xfs.removePromise(pnpDataPath);
+      await xfs.removePromise(pnpPath.esmLoader);
 
       return;
     }
