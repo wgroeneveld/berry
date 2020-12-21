@@ -56,7 +56,7 @@ function readJson(filePath: string) {
 const commonResolver = ResolverFactory.createResolver({
   fileSystem: cachedFS,
   conditionNames: [`node`, `import`],
-  extensions: [`.mjs`, `.js`, `.json`],
+  extensions: [`.mjs`, `.cjs`, `.js`, `.json`],
 });
 
 export async function resolve(specifier: string, context: any, defaultResolver: any) {
@@ -70,7 +70,7 @@ export async function resolve(specifier: string, context: any, defaultResolver: 
       : ResolverFactory.createResolver({
         fileSystem: cachedFS,
         conditionNames: conditions,
-        extensions: [`.mjs`, `.js`, `.json`],
+        extensions: [`.mjs`, `.cjs`, `.js`, `.json`],
       });
 
   let parentPath = parentURL ? fileURLToPath(parentURL) : process.cwd();
