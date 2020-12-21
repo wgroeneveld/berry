@@ -272,7 +272,7 @@ export class PnpInstaller implements Installer {
       await xfs.removePromise(pnpPath.cjsLegacy);
     }
 
-    if (this.opts.project.topLevelWorkspace.manifest.type !== `module`)
+    if (this.opts.project.configuration.get(`enableExperimentalESMLoader`) !== true || this.opts.project.topLevelWorkspace.manifest.type !== `module`)
       await xfs.removePromise(pnpPath.esmLoader);
 
     if (this.opts.project.configuration.get(`nodeLinker`) !== `pnp`) {
@@ -311,7 +311,7 @@ export class PnpInstaller implements Installer {
       await xfs.chmodPromise(pnpDataPath, 0o644);
     }
 
-    if (pnpPath.cjs.endsWith(`.cjs`)) {
+    if (this.opts.project.configuration.get(`enableExperimentalESMLoader`) === true || this.opts.project.topLevelWorkspace.manifest.type === `module`) {
       await xfs.writeFilePromise(pnpPath.esmLoader, `import { syncBuiltinESMExports, createRequire, builtinModules } from 'module';
 import { fileURLToPath, pathToFileURL, URL } from 'url';
 syncBuiltinESMExports();
