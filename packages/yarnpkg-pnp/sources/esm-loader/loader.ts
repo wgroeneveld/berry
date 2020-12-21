@@ -1,6 +1,6 @@
 import {ResolverFactory, CachedInputFileSystem} from 'enhanced-resolve';
 import fs                                       from 'fs';
-import {builtinModules}                         from 'module';
+import {builtinModules, createRequire}          from 'module';
 import path                                     from 'path';
 import {fileURLToPath, pathToFileURL, URL}      from 'url';
 
@@ -19,8 +19,8 @@ const cachedFS = new CachedInputFileSystem(fs);
 
 function isDirectory(filePath: string) {
   return new Promise<boolean>((resolve, reject) => {
-    cachedFS.lstat(filePath, (err, stat) => {
-      if (err) {
+    cachedFS.lstat!(filePath, (err, stat) => {
+      if (err || !stat) {
         reject(err);
       } else {
         resolve(stat.isDirectory());
@@ -32,7 +32,7 @@ function isDirectory(filePath: string) {
 function readFile(filePath: string) {
   return new Promise<string>((resolve, reject) => {
     cachedFS.readFile(filePath, (err, result) => {
-      if (err) {
+      if (err || !result) {
         reject(err);
       } else {
         resolve(Buffer.isBuffer(result) ? result.toString(`utf8`) : result);
@@ -43,7 +43,7 @@ function readFile(filePath: string) {
 
 function readJson(filePath: string) {
   return new Promise<any>((resolve, reject) => {
-    cachedFS.readJson(filePath, (err, result) => {
+    cachedFS.readJson!(filePath, (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -98,34 +98,51 @@ export async function resolve(specifier: string, context: any, defaultResolver: 
   });
 }
 
-const moduleTypeCache = new Map<string, string>();
+const realModules = new Set<string>();
 
 export async function getFormat(resolved: string, context: any, defaultGetFormat: any) {
   const parsedURL = new URL(resolved);
-  if (parsedURL.protocol !== `file:` || !parsedURL.pathname.endsWith(`.js`))
+  if (parsedURL.protocol !== `file:`)
     return defaultGetFormat(resolved, context, defaultGetFormat);
 
-  let packageJSONUrl = new URL(`./package.json`, resolved);
-  while (true) {
-    if (packageJSONUrl.pathname.endsWith(`node_modules/package.json`)) break;
-
-    const filePath = fileURLToPath(packageJSONUrl);
-    const cachedType = moduleTypeCache.get(filePath);
-    if (cachedType) return {format: cachedType};
-
-    try {
-      const moduleType = (await readJson(filePath)).type ?? `commonjs`;
-      moduleTypeCache.set(filePath, moduleType);
+  switch (path.extname(parsedURL.pathname)) {
+    case `.mjs`: {
+      realModules.add(fileURLToPath(resolved));
       return {
-        format: moduleType,
+        format: `module`,
       };
-    } catch {}
+    }
+    case `.json`: {
+      return {
+        format: `module`,
+      };
+    }
+    default: {
+      let packageJSONUrl = new URL(`./package.json`, resolved);
+      while (true) {
+        if (packageJSONUrl.pathname.endsWith(`node_modules/package.json`)) break;
 
-    const lastPackageJSONUrl = packageJSONUrl;
-    packageJSONUrl = new URL(`../package.json`, packageJSONUrl);
+        const filePath = fileURLToPath(packageJSONUrl);
 
-    if (packageJSONUrl.pathname === lastPackageJSONUrl.pathname) {
-      break;
+        try {
+          let moduleType = (await readJson(filePath)).type ?? `commonjs`;
+          if (moduleType === `commonjs`)
+            moduleType = `module`;
+          else
+            realModules.add(fileURLToPath(resolved));
+
+          return {
+            format: moduleType,
+          };
+        } catch {}
+
+        const lastPackageJSONUrl = packageJSONUrl;
+        packageJSONUrl = new URL(`../package.json`, packageJSONUrl);
+
+        if (packageJSONUrl.pathname === lastPackageJSONUrl.pathname) {
+          break;
+        }
+      }
     }
   }
 
@@ -136,7 +153,41 @@ export async function getSource(urlString: string, context: any, defaultGetSourc
   const url = new URL(urlString);
   if (url.protocol !== `file:`) return defaultGetSource(url, context, defaultGetSource);
 
+  urlString = fileURLToPath(urlString);
+
+  if (realModules.has(urlString)) {
+    return {
+      source: await readFile(urlString),
+    };
+  }
+
+  const fakeModulePath = path.join(path.dirname(urlString), `noop.js`);
+
+  const require = createRequire(fakeModulePath);
+  const dynModule = require(urlString);
+
+  let exportStrings: Array<string> = [];
+  if (dynModule.__esModule === true) {
+    exportStrings = Object.getOwnPropertyNames(dynModule).map(propKey => {
+      if (propKey === `default`) {
+        return `export default cjs['default']`;
+      } else {
+        return `const __${propKey} = cjs['${propKey}'];\n export { __${propKey} as ${propKey} }`;
+      }
+    });
+  } else {
+    exportStrings = [`export default cjs`];
+  }
+
+  const code = `
+  import {createRequire} from 'module';
+  const require = createRequire('${fakeModulePath.replace(/\\/g,`/`)}');
+  const cjs = require('${urlString.replace(/\\/g,`/`)}');
+  
+  ${exportStrings.join(`\n`)}
+  `;
+
   return {
-    source: await readFile(fileURLToPath(url)),
+    source: code,
   };
 }
