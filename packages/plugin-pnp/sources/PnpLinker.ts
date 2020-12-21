@@ -2,7 +2,7 @@ import {miscUtils, structUtils, formatUtils, Descriptor, LocatorHash}           
 import {FetchResult, Locator, Package}                                                                       from '@yarnpkg/core';
 import {Linker, LinkOptions, MinimalLinkOptions, Manifest, MessageName, DependencyMeta, LinkType, Installer} from '@yarnpkg/core';
 import {CwdFS, PortablePath, VirtualFS, npath, ppath, xfs, Filename}                                         from '@yarnpkg/fslib';
-import {generateInlinedScript, generateSplitScript, PackageRegistry, PnpSettings}                            from '@yarnpkg/pnp';
+import {generateInlinedScript, generateSplitScript, PackageRegistry, PnpSettings, getESMLoaderTemplate}      from '@yarnpkg/pnp';
 import {UsageError}                                                                                          from 'clipanion';
 
 import {getPnpPath}                                                                                          from './index';
@@ -311,48 +311,9 @@ export class PnpInstaller implements Installer {
       await xfs.chmodPromise(pnpDataPath, 0o644);
     }
 
-    if (this.opts.project.configuration.get(`enableExperimentalESMLoader`) === true || this.opts.project.topLevelWorkspace.manifest.type === `module`) {
-      await xfs.writeFilePromise(pnpPath.esmLoader, `import { syncBuiltinESMExports, createRequire, builtinModules } from 'module';
-import { fileURLToPath, pathToFileURL, URL } from 'url';
-syncBuiltinESMExports();
 
-const pnpapi = createRequire(import.meta.url)('pnpapi');
-
-function isValidURL(str) {
-  try {
-    new URL(str);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const builtins = new Set([...builtinModules]);
-
-export async function resolve(specifier, context, defaultResolver) {
-  if (builtins.has(specifier) || isValidURL(specifier)) {
-    return defaultResolver(specifier, context, defaultResolver);
-  }
-
-  const { parentURL = null } = context;
-
-  const resolvedPath = pnpapi.resolveRequest(
-    specifier,
-    parentURL ? fileURLToPath(parentURL) : undefined
-  );
-
-  if (!resolvedPath) {
-    throw new Error(
-      \`Assertion failed: resolveRequest returned a falsy value for '\${specifier}' from '\${parentURL}'\`
-    );
-  }
-
-  return {
-    url: pathToFileURL(resolvedPath).href,
-  };
-}
-      `);
-    }
+    if (this.opts.project.configuration.get(`enableExperimentalESMLoader`) === true || this.opts.project.topLevelWorkspace.manifest.type === `module`)
+      await xfs.writeFilePromise(pnpPath.esmLoader, getESMLoaderTemplate());
 
     const pnpUnpluggedFolder = this.opts.project.configuration.get(`pnpUnpluggedFolder`);
     if (this.unpluggedPaths.size === 0) {
