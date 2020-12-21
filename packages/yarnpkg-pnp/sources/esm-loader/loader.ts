@@ -60,7 +60,14 @@ const commonResolver = ResolverFactory.createResolver({
 });
 
 export async function resolve(specifier: string, context: any, defaultResolver: any) {
-  if (builtins.has(specifier) || isValidURL(specifier)) return defaultResolver(specifier, context, defaultResolver);
+  let validURL;
+  if (builtins.has(specifier) || (validURL = isValidURL(specifier))) {
+    if (!validURL || pathToFileURL(specifier).protocol !== `file:`) {
+      return defaultResolver(specifier, context, defaultResolver);
+    } else {
+      specifier = fileURLToPath(specifier);
+    }
+  }
 
   const {parentURL, conditions = []} = context;
 
