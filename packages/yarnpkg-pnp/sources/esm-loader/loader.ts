@@ -60,6 +60,7 @@ const commonResolver = ResolverFactory.createResolver({
   fileSystem: cachedFS,
   conditionNames: [`node`, `import`],
   extensions: [`.js`, `.json`],
+  fullySpecified: true,
 });
 
 // @ts-expect-error - This module, when bundled, is still ESM so this is valid
@@ -87,6 +88,7 @@ export async function resolve(specifier: string, context: any, defaultResolver: 
         fileSystem: cachedFS,
         conditionNames: conditions,
         extensions: [`.js`, `.json`],
+        fullySpecified: true,
       });
 
   let parentPath = parentURL ? fileURLToPath(parentURL) : process.cwd();
