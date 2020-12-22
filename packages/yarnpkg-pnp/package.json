@@ -16,6 +16,7 @@
     "@yarnpkg/builder": "workspace:^2.1.3",
     "@yarnpkg/libzip": "workspace:^2.2.1",
     "@yarnpkg/monorepo": "workspace:0.0.0",
+    "cjs-module-lexer": "^1.0.0",
     "enhanced-resolve": "^5.4.1",
     "rollup": "^2.35.1",
     "typescript": "4.1.0-beta",

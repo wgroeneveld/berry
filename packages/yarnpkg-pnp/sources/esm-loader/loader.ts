@@ -1,6 +1,7 @@
+import {parse, init}                            from 'cjs-module-lexer';
 import {ResolverFactory, CachedInputFileSystem} from 'enhanced-resolve';
 import fs                                       from 'fs';
-import {builtinModules, createRequire}          from 'module';
+import {builtinModules}                         from 'module';
 import path                                     from 'path';
 import {fileURLToPath, pathToFileURL, URL}      from 'url';
 
@@ -149,6 +150,16 @@ export async function getFormat(resolved: string, context: any, defaultGetFormat
   throw new Error(`Unable to get module type of '${resolved}'`);
 }
 
+let parserInit: Promise<void> | null = init().then(() => {
+  parserInit = null;
+});
+
+async function parseExports(filePath: string) {
+  const {exports} = parse(await readFile(filePath));
+
+  return new Set(exports);
+}
+
 export async function getSource(urlString: string, context: any, defaultGetSource: any) {
   const url = new URL(urlString);
   if (url.protocol !== `file:`) return defaultGetSource(url, context, defaultGetSource);
@@ -161,30 +172,31 @@ export async function getSource(urlString: string, context: any, defaultGetSourc
     };
   }
 
-  const fakeModulePath = path.join(path.dirname(urlString), `noop.js`);
+  if (parserInit !== null) await parserInit;
 
-  const require = createRequire(fakeModulePath);
-  const dynModule = require(urlString);
+  const exports = await parseExports(urlString);
 
-  let exportStrings: Array<string> = [];
-  if (dynModule.__esModule === true) {
-    exportStrings = Object.getOwnPropertyNames(dynModule).map(propKey => {
-      if (propKey === `default`) {
-        return `export default cjs['default']`;
+  let exportStrings = ``;
+  if (exports.has(`__esModule`)) {
+    for (const exportName of exports) {
+      if (exportName === `default`) {
+        exportStrings += `export default cjs['default']\n`;
       } else {
-        return `const __${propKey} = cjs['${propKey}'];\n export { __${propKey} as ${propKey} }`;
+        exportStrings += `const __${exportName} = cjs['${exportName}'];\n export { __${exportName} as ${exportName} }\n`;
       }
-    });
+    }
   } else {
-    exportStrings = [`export default cjs`];
+    exportStrings = `export default cjs`;
   }
+
+  const fakeModulePath = path.join(path.dirname(urlString), `noop.js`);
 
   const code = `
   import {createRequire} from 'module';
   const require = createRequire('${fakeModulePath.replace(/\\/g,`/`)}');
   const cjs = require('${urlString.replace(/\\/g,`/`)}');
   
-  ${exportStrings.join(`\n`)}
+  ${exportStrings}
   `;
 
   return {

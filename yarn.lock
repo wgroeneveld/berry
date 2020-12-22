@@ -6300,6 +6300,7 @@ __metadata:
     "@yarnpkg/fslib": "workspace:^2.4.0"
     "@yarnpkg/libzip": "workspace:^2.2.1"
     "@yarnpkg/monorepo": "workspace:0.0.0"
+    cjs-module-lexer: ^1.0.0
     enhanced-resolve: ^5.4.1
     rollup: ^2.35.1
     tslib: ^1.13.0
@@ -8769,6 +8770,13 @@ __metadata:
     inherits: ^2.0.1
     safe-buffer: ^5.0.1
   checksum: ec80001ec91dbb7c5c08facc00ffc9c75fed7abd6d720c7a9c62c260aa2e5cb2655c183e011b50b8b711f755b1753c7fdd2ca44c091ee78d81c377ca74ed83c9
+  languageName: node
+  linkType: hard
+
+"cjs-module-lexer@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "cjs-module-lexer@npm:1.0.0"
+  checksum: 5460ba5ac64ab7014b2263a2743a2b5e29a9add758fe22a84407581b59d916cc25758e34fb17d56d9911e27403aa7f090b474eb6e69f86c8df4aa77cb6aff908
   languageName: node
   linkType: hard
 

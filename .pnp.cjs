@@ -11813,6 +11813,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@yarnpkg/fslib", "workspace:packages/yarnpkg-fslib"],
             ["@yarnpkg/libzip", "workspace:packages/yarnpkg-libzip"],
             ["@yarnpkg/monorepo", "workspace:."],
+            ["cjs-module-lexer", "npm:1.0.0"],
             ["enhanced-resolve", "npm:5.4.1"],
             ["rollup", "npm:2.35.1"],
             ["tslib", "npm:1.13.0"],
@@ -14934,6 +14935,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cipher-base", "npm:1.0.4"],
             ["inherits", "npm:2.0.3"],
             ["safe-buffer", "npm:5.1.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["cjs-module-lexer", [
+        ["npm:1.0.0", {
+          "packageLocation": "./.yarn/cache/cjs-module-lexer-npm-1.0.0-3747deb372-5460ba5ac6.zip/node_modules/cjs-module-lexer/",
+          "packageDependencies": [
+            ["cjs-module-lexer", "npm:1.0.0"]
           ],
           "linkType": "HARD",
         }]
