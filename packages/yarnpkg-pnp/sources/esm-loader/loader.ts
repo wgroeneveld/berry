@@ -176,17 +176,11 @@ export async function getSource(urlString: string, context: any, defaultGetSourc
 
   const exports = await parseExports(urlString);
 
-  let exportStrings = ``;
-  if (exports.has(`__esModule`)) {
-    for (const exportName of exports) {
-      if (exportName === `default`) {
-        exportStrings += `export default cjs['default']\n`;
-      } else {
-        exportStrings += `const __${exportName} = cjs['${exportName}'];\n export { __${exportName} as ${exportName} }\n`;
-      }
+  let exportStrings = `export default cjs\n`;
+  for (const exportName of exports) {
+    if (exportName !== `default`) {
+      exportStrings += `const __${exportName} = cjs['${exportName}'];\n export { __${exportName} as ${exportName} }\n`;
     }
-  } else {
-    exportStrings = `export default cjs`;
   }
 
   const fakeModulePath = path.join(path.dirname(urlString), `noop.js`);
