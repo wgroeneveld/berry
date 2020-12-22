@@ -19,10 +19,10 @@ const builtins = new Set([...builtinModules]);
 const cachedFS = new CachedInputFileSystem(fs);
 
 function isDirectory(filePath: string) {
-  return new Promise<boolean>((resolve, reject) => {
+  return new Promise<boolean>(resolve => {
     cachedFS.lstat!(filePath, (err, stat) => {
       if (err || !stat) {
-        reject(err);
+        resolve(false);
       } else {
         resolve(stat.isDirectory());
       }
