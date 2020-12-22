@@ -60,6 +60,7 @@ const commonResolver = ResolverFactory.createResolver({
   fileSystem: cachedFS,
   conditionNames: [`node`, `import`],
   extensions: [`.js`, `.json`],
+  // TODO: Disable if --experimental-specifier-resolution=node
   fullySpecified: true,
 });
 
@@ -88,6 +89,7 @@ export async function resolve(specifier: string, context: any, defaultResolver: 
         fileSystem: cachedFS,
         conditionNames: conditions,
         extensions: [`.js`, `.json`],
+        // TODO: Disable if --experimental-specifier-resolution=node
         fullySpecified: true,
       });
 
@@ -129,6 +131,8 @@ export async function getFormat(resolved: string, context: any, defaultGetFormat
       };
     }
     case `.json`: {
+      // TODO: Enable if --experimental-json-modules is present
+      throw new Error(`Unknown file extension ".json" for ${fileURLToPath(resolved)}`);
       return {
         format: `module`,
       };
