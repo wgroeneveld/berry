@@ -1,9 +1,11 @@
 import {parse, init}                            from 'cjs-module-lexer';
 import {ResolverFactory, CachedInputFileSystem} from 'enhanced-resolve';
 import fs                                       from 'fs';
-import {builtinModules}                         from 'module';
+import {builtinModules, createRequire}          from 'module';
 import path                                     from 'path';
 import {fileURLToPath, pathToFileURL, URL}      from 'url';
+
+import {PnpApi}                                 from "../types";
 
 function isValidURL(str: string) {
   try {
@@ -60,6 +62,12 @@ const commonResolver = ResolverFactory.createResolver({
   extensions: [`.js`, `.json`],
 });
 
+// @ts-expect-error - This module, when bundled, is still ESM so this is valid
+const pnpapi: PnpApi = createRequire(import.meta.url)(`pnpapi`);
+
+// TODO: Reuse this from the other files (this is the third copy)
+const pathRegExp = /^(?![a-zA-Z]:[\\/]|\\\\|\.{0,2}(?:\/|$))((?:@[^/]+\/)?[^/]+)\/*(.*|)$/;
+
 export async function resolve(specifier: string, context: any, defaultResolver: any) {
   let validURL;
   if (builtins.has(specifier) || (validURL = isValidURL(specifier))) {
@@ -93,7 +101,12 @@ export async function resolve(specifier: string, context: any, defaultResolver: 
       if (err || !file) {
         reject(err);
       } else {
-        resolve({url: pathToFileURL(file).href});
+        // Guard against https://github.com/webpack/enhanced-resolve/issues/273
+        if (specifier.match(pathRegExp) !== null && !pnpapi.findPackageLocator(file)) {
+          reject(new Error(`'enhanced-resolve' went outside of the pnpapi and resolved '${specifier}' to '${file}'`));
+        } else {
+          resolve({url: pathToFileURL(file).href});
+        }
       }
     });
   });
