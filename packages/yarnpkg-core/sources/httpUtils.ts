@@ -61,9 +61,8 @@ export function getNetworkSettings(target: string, opts: { configuration: Config
 
   const mergableKeys = Object.keys(mergedNetworkSettings) as Array<keyof NetworkSettingsType>;
 
-  const url = new URL(target);
   for (const [glob, config] of networkSettings) {
-    if (micromatch.isMatch(url.hostname, glob)) {
+    if (micromatch.isMatch(target, glob, {contains: true})) {
       for (const key of mergableKeys) {
         const setting = config.get(key);
         if (setting !== null && typeof mergedNetworkSettings[key] === `undefined`) {
