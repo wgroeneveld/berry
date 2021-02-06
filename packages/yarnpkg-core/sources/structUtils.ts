@@ -21,10 +21,12 @@ const VIRTUAL_ABBREVIATE = 5;
  * @param name The name of the package
  */
 export function makeIdent(scope: string | null, name: string): Ident {
-  if (scope?.startsWith(`@`))
-    throw new Error(`Invalid scope: don't prefix it with '@'`);
+  return miscUtils.memoize(makeIdent, `${scope}-${name}`, () => {
+    if (scope?.startsWith(`@`))
+      throw new Error(`Invalid scope: don't prefix it with '@'`);
 
-  return {identHash: hashUtils.makeHash<IdentHash>(scope, name), scope, name};
+    return {identHash: hashUtils.makeHash<IdentHash>(scope, name), scope, name};
+  });
 }
 
 /**
@@ -34,7 +36,9 @@ export function makeIdent(scope: string | null, name: string): Ident {
  * @param range The range to attach (eg. `^1.0.0`)
  */
 export function makeDescriptor(ident: Ident, range: string): Descriptor {
-  return {identHash: ident.identHash, scope: ident.scope, name: ident.name, descriptorHash: hashUtils.makeHash<DescriptorHash>(ident.identHash, range), range};
+  return miscUtils.memoize(makeDescriptor, `${ident.identHash}-${range}`, () => {
+    return {identHash: ident.identHash, scope: ident.scope, name: ident.name, descriptorHash: hashUtils.makeHash<DescriptorHash>(ident.identHash, range), range};
+  });
 }
 
 /**
@@ -44,7 +48,9 @@ export function makeDescriptor(ident: Ident, range: string): Descriptor {
  * @param range The reference to attach (eg. `1.0.0`)
  */
 export function makeLocator(ident: Ident, reference: string): Locator {
-  return {identHash: ident.identHash, scope: ident.scope, name: ident.name, locatorHash: hashUtils.makeHash<LocatorHash>(ident.identHash, reference), reference};
+  return miscUtils.memoize(makeLocator, `${ident.identHash}-${reference}`, () => {
+    return {identHash: ident.identHash, scope: ident.scope, name: ident.name, locatorHash: hashUtils.makeHash<LocatorHash>(ident.identHash, reference), reference};
+  });
 }
 
 /**
@@ -317,17 +323,19 @@ export function parseIdent(string: string): Ident {
  * @param string The ident string (eg. `@types/lodash`)
  */
 export function tryParseIdent(string: string): Ident | null {
-  const match = string.match(/^(?:@([^/]+?)\/)?([^/]+)$/);
-  if (!match)
-    return null;
+  return miscUtils.memoize(tryParseIdent, string, () => {
+    const match = string.match(/^(?:@([^/]+?)\/)?([^/]+)$/);
+    if (!match)
+      return null;
 
-  const [, scope, name] = match;
+    const [, scope, name] = match;
 
-  const realScope = typeof scope !== `undefined`
-    ? scope
-    : null;
+    const realScope = typeof scope !== `undefined`
+      ? scope
+      : null;
 
-  return makeIdent(realScope, name);
+    return makeIdent(realScope, name);
+  });
 }
 
 /**
@@ -355,26 +363,28 @@ export function parseDescriptor(string: string, strict: boolean = false): Descri
  * @param strict If `false`, the range is optional (`unknown` will be used as fallback)
  */
 export function tryParseDescriptor(string: string, strict: boolean = false): Descriptor | null {
-  const match = strict
-    ? string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))$/)
-    : string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))?$/);
+  return miscUtils.memoize(tryParseDescriptor, `${string}-${strict}`, () => {
+    const match = strict
+      ? string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))$/)
+      : string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))?$/);
 
-  if (!match)
-    return null;
+    if (!match)
+      return null;
 
-  const [, scope, name, range] = match;
-  if (range === `unknown`)
-    throw new Error(`Invalid range (${string})`);
+    const [, scope, name, range] = match;
+    if (range === `unknown`)
+      throw new Error(`Invalid range (${string})`);
 
-  const realScope = typeof scope !== `undefined`
-    ? scope
-    : null;
+    const realScope = typeof scope !== `undefined`
+      ? scope
+      : null;
 
-  const realRange = typeof range !== `undefined`
-    ? range
-    : `unknown`;
+    const realRange = typeof range !== `undefined`
+      ? range
+      : `unknown`;
 
-  return makeDescriptor(makeIdent(realScope, name), realRange);
+    return makeDescriptor(makeIdent(realScope, name), realRange);
+  });
 }
 
 /**
@@ -402,26 +412,28 @@ export function parseLocator(string: string, strict: boolean = false): Locator {
  * @param strict If `false`, the reference is optional (`unknown` will be used as fallback)
  */
 export function tryParseLocator(string: string, strict: boolean = false): Locator | null {
-  const match = strict
-    ? string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))$/)
-    : string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))?$/);
+  return miscUtils.memoize(tryParseLocator, `${string}-${strict}`, () => {
+    const match = strict
+      ? string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))$/)
+      : string.match(/^(?:@([^/]+?)\/)?([^/]+?)(?:@(.+))?$/);
 
-  if (!match)
-    return null;
+    if (!match)
+      return null;
 
-  const [, scope, name, reference] = match;
-  if (reference === `unknown`)
-    throw new Error(`Invalid reference (${string})`);
+    const [, scope, name, reference] = match;
+    if (reference === `unknown`)
+      throw new Error(`Invalid reference (${string})`);
 
-  const realScope = typeof scope !== `undefined`
-    ? scope
-    : null;
+    const realScope = typeof scope !== `undefined`
+      ? scope
+      : null;
 
-  const realReference = typeof reference !== `undefined`
-    ? reference
-    : `unknown`;
+    const realReference = typeof reference !== `undefined`
+      ? reference
+      : `unknown`;
 
-  return makeLocator(makeIdent(realScope, name), realReference);
+    return makeLocator(makeIdent(realScope, name), realReference);
+  });
 }
 
 type ParseRangeOptions = {

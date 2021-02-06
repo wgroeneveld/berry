@@ -1,5 +1,6 @@
 import {PortablePath, npath} from '@yarnpkg/fslib';
 import {UsageError}          from 'clipanion';
+import {klona}               from 'klona/json';
 import micromatch            from 'micromatch';
 import {Readable, Transform} from 'stream';
 
@@ -378,3 +379,20 @@ export function tryParseOptionalBoolean(value: unknown): boolean | undefined | n
 export type FilterKeys<T extends {}, Filter> = {
   [K in keyof T]: T[K] extends Filter ? K : never;
 }[keyof T];
+
+const memoizeStore = new WeakMap<object, Map<any, any>>();
+export function memoize<TKey, TValue>(
+  selfRef: object,
+  key: TKey,
+  func: () => TValue
+) {
+  let cache = memoizeStore.get(selfRef);
+  if (typeof cache === `undefined`)
+    memoizeStore.set(selfRef, cache = new Map());
+
+  let cacheEntry = cache.get(key);
+  if (typeof cacheEntry === `undefined`)
+    cache.set(key, cacheEntry = func());
+
+  return klona(cacheEntry!);
+}
