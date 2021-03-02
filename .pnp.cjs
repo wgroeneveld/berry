@@ -11438,6 +11438,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@yarnpkg/fslib", "workspace:packages/yarnpkg-fslib"],
             ["@yarnpkg/libzip", "workspace:packages/yarnpkg-libzip"],
             ["clipanion", "virtual:e04a2594c769771b96db34e7a92a8a3af1c98ae86dce662589a5c5d5209e16875506f8cb5f4c2230a2b2ae06335b14466352c4ed470d39edf9edb6c515984525#npm:3.0.0-rc.10"],
+            ["iconv-lite", "npm:0.6.2"],
+            ["jschardet", "npm:2.3.0"],
             ["tslib", "npm:1.13.0"]
           ],
           "packagePeers": [
@@ -11459,6 +11461,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@yarnpkg/fslib", "workspace:packages/yarnpkg-fslib"],
             ["@yarnpkg/libzip", "workspace:packages/yarnpkg-libzip"],
             ["clipanion", "virtual:e04a2594c769771b96db34e7a92a8a3af1c98ae86dce662589a5c5d5209e16875506f8cb5f4c2230a2b2ae06335b14466352c4ed470d39edf9edb6c515984525#npm:3.0.0-rc.10"],
+            ["iconv-lite", "npm:0.6.2"],
+            ["jschardet", "npm:2.3.0"],
             ["tslib", "npm:1.13.0"]
           ],
           "packagePeers": [
@@ -11478,6 +11482,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@yarnpkg/fslib", "workspace:packages/yarnpkg-fslib"],
             ["@yarnpkg/libzip", "workspace:packages/yarnpkg-libzip"],
             ["clipanion", "virtual:e04a2594c769771b96db34e7a92a8a3af1c98ae86dce662589a5c5d5209e16875506f8cb5f4c2230a2b2ae06335b14466352c4ed470d39edf9edb6c515984525#npm:3.0.0-rc.10"],
+            ["iconv-lite", "npm:0.6.2"],
+            ["jschardet", "npm:2.3.0"],
             ["tslib", "npm:1.13.0"]
           ],
           "linkType": "SOFT",
@@ -22890,6 +22896,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["safer-buffer", "npm:2.1.2"]
           ],
           "linkType": "HARD",
+        }],
+        ["npm:0.6.2", {
+          "packageLocation": "./.yarn/cache/iconv-lite-npm-0.6.2-13e85ec7dc-0785670120.zip/node_modules/iconv-lite/",
+          "packageDependencies": [
+            ["iconv-lite", "npm:0.6.2"],
+            ["safer-buffer", "npm:2.1.2"]
+          ],
+          "linkType": "HARD",
         }]
       ]],
       ["icss-replace-symbols", [
@@ -25435,6 +25449,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/jsbn-npm-0.1.1-0eb7132404-b530d48a64.zip/node_modules/jsbn/",
           "packageDependencies": [
             ["jsbn", "npm:0.1.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["jschardet", [
+        ["npm:2.3.0", {
+          "packageLocation": "./.yarn/cache/jschardet-npm-2.3.0-3d2d495fe8-5f6ed353d1.zip/node_modules/jschardet/",
+          "packageDependencies": [
+            ["jschardet", "npm:2.3.0"]
           ],
           "linkType": "HARD",
         }]

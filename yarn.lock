@@ -6098,6 +6098,8 @@ __metadata:
     "@yarnpkg/fslib": "workspace:^2.4.0"
     "@yarnpkg/libzip": "workspace:^2.2.1"
     clipanion: ^3.0.0-rc.10
+    iconv-lite: ^0.6.2
+    jschardet: ^2.3.0
     tslib: ^1.13.0
   peerDependencies:
     "@yarnpkg/cli": ^2.4.0
@@ -15122,6 +15124,15 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"iconv-lite@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "iconv-lite@npm:0.6.2"
+  dependencies:
+    safer-buffer: ">= 2.1.2 < 3.0.0"
+  checksum: 0785670120f57b5912c6a4391d6a69914906746d259b59de884dc6d324a52a0abde38d5804f67370192fec6878d01e7306de525568abcea70eb41c2bceb9f547
+  languageName: node
+  linkType: hard
+
 "icss-replace-symbols@npm:^1.1.0":
   version: 1.1.0
   resolution: "icss-replace-symbols@npm:1.1.0"
@@ -17272,6 +17283,13 @@ fsevents@^1.2.7:
   version: 0.1.1
   resolution: "jsbn@npm:0.1.1"
   checksum: b530d48a64e6aff9523407856a54c5b9beee30f34a410612057f4fa097d90072fc8403c49604dacf0c3e7620dca43c2b7f0de3f954af611e43716a254c46f6f5
+  languageName: node
+  linkType: hard
+
+"jschardet@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "jschardet@npm:2.3.0"
+  checksum: 5f6ed353d1437f62122939fa1771716682cb17248d53e4200d44f7e42d5553a470d7d43d2c1be5e7dd88bac556cf3684c418327ae62c7702a4eae4a339fefc82
   languageName: node
   linkType: hard
 
@@ -23729,7 +23747,7 @@ resolve@1.9.0:
   languageName: node
   linkType: hard
 
-"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:^2.0.2, safer-buffer@npm:^2.1.0, safer-buffer@npm:~2.1.0":
+"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0, safer-buffer@npm:^2.0.2, safer-buffer@npm:^2.1.0, safer-buffer@npm:~2.1.0":
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: 549ba83f5b314b59898efe3422120ce1ca7987a6eae5925a5fa5db930dc414d4a9dde0a5594f89638cd6ea60b6840ea961872908933ac2428d1726489db46fa5

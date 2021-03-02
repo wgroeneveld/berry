@@ -7,6 +7,8 @@
     "@yarnpkg/fslib": "workspace:^2.4.0",
     "@yarnpkg/libzip": "workspace:^2.2.1",
     "clipanion": "^3.0.0-rc.10",
+    "iconv-lite": "^0.6.2",
+    "jschardet": "^2.3.0",
     "tslib": "^1.13.0"
   },
   "peerDependencies": {
