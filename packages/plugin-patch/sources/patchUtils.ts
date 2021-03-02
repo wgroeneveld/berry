@@ -1,5 +1,6 @@
 import {Cache, structUtils, Locator, Descriptor, Ident, Project, ThrowReport, miscUtils, FetchOptions, Package, execUtils} from '@yarnpkg/core';
 import {npath, PortablePath, xfs, ppath, Filename, NativePath, CwdFS}                                                      from '@yarnpkg/fslib';
+import {StringDecoder}                                                                                                     from 'string_decoder';
 
 import {Hooks as PatchHooks}                                                                                               from './index';
 
@@ -121,14 +122,18 @@ export async function loadPatchFiles(parentLocator: Locator | null, patchPaths: 
   const patchFiles = await miscUtils.releaseAfterUseAsync(async () => {
     return await Promise.all(patchPaths.map(async patchPath => visitPatchPath({
       onAbsolute: async () => {
-        return await xfs.readFilePromise(patchPath, `utf8`);
+        const data = await xfs.readFilePromise(patchPath);
+        const decoder = new StringDecoder();
+        return decoder.end(data);
       },
 
       onRelative: async () => {
         if (effectiveParentFetch === null)
           throw new Error(`Assertion failed: The parent locator should have been fetched`);
 
-        return await effectiveParentFetch.packageFs.readFilePromise(ppath.join(effectiveParentFetch.prefixPath, patchPath), `utf8`);
+        const data = await effectiveParentFetch.packageFs.readFilePromise(ppath.join(effectiveParentFetch.prefixPath, patchPath));
+        const decoder = new StringDecoder();
+        return decoder.end(data);
       },
 
       onBuiltin: async name => {
