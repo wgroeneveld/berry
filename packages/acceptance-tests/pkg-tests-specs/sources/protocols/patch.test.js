@@ -170,5 +170,25 @@ describe(`Protocols`, () => {
         },
       ),
     );
+
+    test(
+      `it should apply patches not encoded as utf8`,
+      makeTemporaryEnv(
+        {
+          dependencies: {[`no-deps`]: `patch:no-deps@1.0.0#my-patch.patch`},
+        },
+        async ({path, run, source}) => {
+          await xfs.writeFilePromise(ppath.join(path, `my-patch.patch`), NO_DEPS_PATCH, {encoding: `utf16le`});
+
+          await run(`install`);
+
+          await expect(source(`require('no-deps')`)).resolves.toMatchObject({
+            name: `no-deps`,
+            version: `1.0.0`,
+            hello: `world`,
+          });
+        },
+      ),
+    );
   });
 });
